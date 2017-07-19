@@ -1,11 +1,12 @@
 ## Put comments here that give an overall description of what your
-## functions do
+## 
 
 ## Write a short comment describing this function
 
 makeCacheMatrix <- function(mat = matrix())
 {
   cachedInv <- NULL
+  cachedOriginal <<- mat
   
   set <- function(y)
   {
@@ -28,16 +29,24 @@ makeCacheMatrix <- function(mat = matrix())
     cachedInv
   }
   
+  getOriginal <- function(inv)
+  {
+    cachedOriginal
+  }
+  
   list(
     set = set
     , get = get
     , setInv = setInv
     , getInv = getInv
+    , getOriginal = getOriginal
   )
 }
 
 
-## Write a short comment describing this function
+## cacheSolve returns a matrix, which is the inverse of the supplied makeCacheMatrix object. 
+## If run once, the inverse is calculated, and then cached in parent environment. Repeated runs on the same argument will return the cached answer.
+## The actual inverse calculation is performed by solve(), andt is subject to all it's limitations.
 
 cacheSolve <- function(mat, ...)
 {
