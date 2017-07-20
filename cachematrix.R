@@ -27,6 +27,10 @@ makeCacheMatrix <- function(mat = matrix())
   getInv <- function(inv)
   {
     cachedInv
+    #have v2 of this seach parent environment for all identical cacheMatrix objects for THEIR cached inverse
+    #this would mean refactoring the code and make a SearchEnvironmentForInverse(mat) function
+    #should i build a call to cacheSolve into this too? basically guaranteeing that getInv always returns inverse without
+    #explicit call to solve?
   }
   
   getOriginal <- function(inv)
@@ -44,11 +48,12 @@ makeCacheMatrix <- function(mat = matrix())
 }
 
 
-## cacheSolve returns a matrix, which is the inverse of the supplied makeCacheMatrix object. 
+## cacheSolve.old returns a matrix, which is the inverse of the supplied makeCacheMatrix object. 
 ## If run once, the inverse is calculated, and then cached in parent environment. Repeated runs on the same argument will return the cached answer.
 ## The actual inverse calculation is performed by solve(), andt is subject to all it's limitations.
+## this is the gimpware function expected for the class - only works for deep copies of the cacheMatrix object
 
-cacheSolve <- function(mat, ...)
+cacheSolve.old <- function(mat, ...)
 {
   inv <- mat$getInv()
   
@@ -65,9 +70,10 @@ cacheSolve <- function(mat, ...)
 }
 
 
-## cacheSolve2 improves cacheSolve by working on shallow copies instead of only deep copies
-## cacheSolve2 searches cache environment for any cacheMatrix objects matching the input, and gets their input
-cacheSolve2 <- function(mat, ...)
+## cacheSolve improves cacheSolve.old by working on shallow copies instead of only deep copies
+## cacheSolve searches cache environment for any cacheMatrix objects matching the input, and gets their input
+
+cacheSolve <- function(mat, ...)
 {
   # check current matrix for cached inverse
   inv <- mat$getInv()
@@ -78,7 +84,7 @@ cacheSolve2 <- function(mat, ...)
     cache_obs <- ls(parent.env(environment()))
     obs_wo_inverse <- c()
     
-    # check all the objects
+    # check all the objects, looking for cacheMatrix objects. there should be a simpler way.
     if (length(cache_obs) > 0)
     {
       for (i in 1:length(cache_obs))
