@@ -84,18 +84,21 @@ cacheSolve2 <- function(mat, ...)
       for (i in 1:length(cache_obs))
       {
         # objects of length 5 (the makecachedmatrix list length) are what we want
-        if (length(get(cached_obs[i]) == 5))
+        if (length(get(cache_obs[i])) == 5)
         {
-            # elements 4 and 5 have known names
-            if (names(get(cached_obs[i])[4])[1] == "getInv" & names(get(cached_obs[i])[5])[1] == "getOriginal")
+          # elements 4 and 5 have known names
+          if (!is.null(names(get(cache_obs[i])[4])[1]) & !is.null(names(get(cache_obs[i])[5])[1]))
+          {
+            if (names(get(cache_obs[i])[4])[1] == "getInv" & names(get(cache_obs[i])[5])[1] == "getOriginal")
             {
-              message("Checking ", cache_obs[i], " for equality with input.")
+              message("Checking object ", cache_obs[i], " for equality with input.")
               
               # check cached object for value identity
-              if (all(get(cached_obs[i])$getOriginal() == mat))
+              if (all(get(cache_obs[i])$getOriginal() == mat$get()))
               {
                 # we have same cached matrix - now check for cached inverse
-                inv <- get(cached_obs[i])$getInv()
+                message("Object ",  cache_obs[i], " matches input. Looking for cached inverse.")
+                inv <- get(cache_obs[i])$getInv()
                 if(!is.null(inv))
                 {
                   message("Getting cached inverse from object ", cache_obs[i])
@@ -108,11 +111,13 @@ cacheSolve2 <- function(mat, ...)
                 }
               }
             }
+          }
         }
       }
     }
     
     # we didn't hit that return in the innermost if above, so calculate the inverse on current object
+    message("Calculating inverse for input, and assigning it to caches for all matching existing objects")
     data <- mat$get()
     inv <- solve(data, ...)
     mat$setInv(inv)
@@ -123,6 +128,7 @@ cacheSolve2 <- function(mat, ...)
       get(obs_wo_inverse[i])$setInv(inv)
     }
     
+    return(inv)
   } else
   {
     message("Getting cached inverse from current object.")
